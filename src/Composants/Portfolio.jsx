@@ -1,356 +1,455 @@
-import React, { useState, useEffect } from 'react';
-import { Github, Linkedin, Instagram, Twitter } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { 
+  User, 
+  Phone, 
+  Mail, 
+  MapPin, 
+  Book, 
+  Award, 
+  Star, 
+  Code, 
+  Briefcase, 
+  ChevronDown, 
+  ArrowRight, 
+  Menu, 
+  X, 
+  Users, 
+  Lightbulb, 
+  RefreshCw, 
+  Palette, 
+  Clock 
+} from "lucide-react";
 
-export default function Portfolio() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState('introduction');
+const Portfolio = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: ""
+  });
+  
+  const [activeSection, setActiveSection] = useState("intro");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [animatedItems, setAnimatedItems] = useState([]);
+  
+  // Références pour le scrolling
+  const introRef = useRef(null);
+  const experienceRef = useRef(null);
+  const softSkillsRef = useRef(null);
+  const formationsRef = useRef(null);
+  const projectsRef = useRef(null);
+  const educationRef = useRef(null);
+  const testimoniesRef = useRef(null);
+  const blogRef = useRef(null);
+  const otherRef = useRef(null);
+  const skillsRef = useRef(null);
+  const contactRef = useRef(null);
 
-  // Handle scroll event for navbar styling and section highlighting
+  // Animation au scroll
   useEffect(() => {
-    const handleScroll = () => {
-      // Change navbar style on scroll
-      setIsScrolled(window.scrollY > 50);
-      
-      // Determine which section is currently in view
-      const sections = ['introduction', 'experiences', 'soft-skills', 'formations', 'projets', 'education', 'temoignages', 'blog', 'autres'];
-      
-      for (const sectionId of sections) {
-        const section = document.getElementById(sectionId);
-        if (section) {
-          const rect = section.getBoundingClientRect();
-          if (rect.top <= 100 && rect.bottom >= 100) {
-            setActiveSection(sectionId);
-            break;
-          }
-        }
-      }
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: "0px 0px -20% 0px"
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const handleIntersect = (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          setAnimatedItems(prev => [...prev, entry.target.id]);
+          
+          // Mettre à jour la section active dans la navigation
+          if (entry.intersectionRatio >= 0.1) {
+            setActiveSection(entry.target.id);
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersect, observerOptions);
+    
+    const sections = [
+      introRef.current,
+      experienceRef.current,
+      softSkillsRef.current,
+      formationsRef.current,
+      projectsRef.current,
+      educationRef.current,
+      testimoniesRef.current,
+      blogRef.current,
+      otherRef.current,
+      skillsRef.current,
+      contactRef.current
+    ];
+    
+    sections.forEach(section => {
+      if (section) observer.observe(section);
+    });
+    
+    return () => {
+      sections.forEach(section => {
+        if (section) observer.unobserve(section);
+      });
+    };
   }, []);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Form submitted:", formData);
+    alert("Message envoyé avec succès !");
+    setFormData({ name: "", email: "", message: "" });
+  };
+
+  const scrollToSection = (ref) => {
+    if (ref && ref.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth' });
+      setIsMenuOpen(false);
+    }
+  };
+
+  // Animation helpers
+  const isAnimated = (id) => animatedItems.includes(id);
+  const animationClass = (id) => isAnimated(id) ? "animate-appear" : "opacity-0";
+
   return (
-    <div className="bg-black text-white min-h-screen">
-      {/* Navigation */}
-      <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-black/90 backdrop-blur-md py-3 shadow-lg' : 'bg-transparent py-6'}`}>
-        <div className="flex justify-between items-center max-w-6xl mx-auto px-4">
-          <div className="flex items-center">
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Abdoul</span>
-          </div>
+    <div className="min-h-screen bg-[#f5f5f5] font-sans overflow-x-hidden">
+      {/* Navigation fixe */}
+      <nav className="fixed top-0 left-0 w-full bg-white z-50 shadow-sm">
+        <div className="flex justify-between items-center p-4 px-8 md:px-16">
+          <div className="font-bold text-xl">Mon Portfolio</div>
           
-          {/* Mobile menu button */}
-          <div className="block md:hidden">
-            <button 
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-white focus:outline-none"
-            >
-              {isMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-              )}
+          {/* Menu mobile */}
+          <div className="md:hidden">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
+              {isMenuOpen ? <X /> : <Menu />}
             </button>
           </div>
           
-          {/* Desktop menu */}
-          <div className="hidden md:flex space-x-6">
-            <a href="#introduction" className={`transition hover:text-blue-400 ${activeSection === 'introduction' ? 'text-blue-400' : ''}`}>Accueil</a>
-            <a href="#experiences" className={`transition hover:text-blue-400 ${activeSection === 'experiences' ? 'text-blue-400' : ''}`}>Expériences</a>
-            <a href="#soft-skills" className={`transition hover:text-blue-400 ${activeSection === 'soft-skills' ? 'text-blue-400' : ''}`}>Compétences</a>
-            <a href="#projets" className={`transition hover:text-blue-400 ${activeSection === 'projets' ? 'text-blue-400' : ''}`}>Projets</a>
-            <a href="#blog" className={`transition hover:text-blue-400 ${activeSection === 'blog' ? 'text-blue-400' : ''}`}>Blog</a>
-            <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full hover:shadow-lg hover:shadow-blue-500/20 transition transform hover:-translate-y-1">Contact</button>
-          </div>
+          {/* Menu desktop */}
+          <ul className="hidden md:flex space-x-8">
+            <li className={`cursor-pointer hover:text-purple-600 transition ${activeSection === "intro" ? "font-medium text-purple-600" : "text-gray-600"}`} onClick={() => scrollToSection(introRef)}>Intro</li>
+            <li className={`cursor-pointer hover:text-purple-600 transition ${activeSection === "experience" ? "font-medium text-purple-600" : "text-gray-600"}`} onClick={() => scrollToSection(experienceRef)}>Expériences</li>
+            <li className={`cursor-pointer hover:text-purple-600 transition ${activeSection === "projects" ? "font-medium text-purple-600" : "text-gray-600"}`} onClick={() => scrollToSection(projectsRef)}>Projets</li>
+            <li className={`cursor-pointer hover:text-purple-600 transition ${activeSection === "formations" ? "font-medium text-purple-600" : "text-gray-600"}`} onClick={() => scrollToSection(formationsRef)}>Formations</li>
+            <li className={`cursor-pointer hover:text-purple-600 transition ${activeSection === "contact" ? "font-medium text-purple-600" : "text-gray-600"}`} onClick={() => scrollToSection(contactRef)}>Contact</li>
+          </ul>
         </div>
         
-        {/* Mobile menu dropdown */}
+        {/* Menu mobile overlay */}
         {isMenuOpen && (
-          <div className="md:hidden bg-gray-900 p-4 absolute w-full">
-            <div className="flex flex-col space-y-3">
-              <a href="#introduction" className="hover:text-blue-400" onClick={() => setIsMenuOpen(false)}>Accueil</a>
-              <a href="#experiences" className="hover:text-blue-400" onClick={() => setIsMenuOpen(false)}>Expériences</a>
-              <a href="#soft-skills" className="hover:text-blue-400" onClick={() => setIsMenuOpen(false)}>Compétences</a>
-              <a href="#projets" className="hover:text-blue-400" onClick={() => setIsMenuOpen(false)}>Projets</a>
-              <a href="#blog" className="hover:text-blue-400" onClick={() => setIsMenuOpen(false)}>Blog</a>
-              <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full">Contact</button>
-            </div>
+          <div className="md:hidden bg-white shadow-md">
+            <ul className="py-4 px-8 space-y-4">
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(introRef)}>Introduction</li>
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(experienceRef)}>Mes Expériences</li>
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(softSkillsRef)}>Soft Skills</li>
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(formationsRef)}>Mes Formations</li>
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(projectsRef)}>Projets</li>
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(educationRef)}>Éducation & Certifications</li>
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(testimoniesRef)}>Témoignages</li>
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(blogRef)}>Blog</li>
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(otherRef)}>Autres</li>
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(skillsRef)}>Compétences</li>
+              <li className="py-2 cursor-pointer hover:text-purple-600 transition" onClick={() => scrollToSection(contactRef)}>Contact</li>
+            </ul>
           </div>
         )}
       </nav>
 
-      {/* Hero Section - Introduction with animations */}
-      <section id="introduction" className="max-w-6xl mx-auto px-4 pt-32 pb-20 flex flex-col items-center relative overflow-hidden">
-        {/* Animated gradient circles in background */}
-        <div className="absolute -z-10 w-full h-full overflow-hidden">
-          <div className="animate-pulse absolute top-20 left-20 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl"></div>
-          <div className="animate-pulse absolute bottom-20 right-20 w-64 h-64 rounded-full bg-purple-500/20 blur-3xl"></div>
-          <div className="animate-pulse delay-700 absolute top-40 right-40 w-32 h-32 rounded-full bg-cyan-500/20 blur-3xl"></div>
-        </div>
-        
-        <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-8 overflow-hidden relative animate-float shadow-lg shadow-blue-500/20">
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20">
-            <img src="/api/placeholder/80/50" alt="Avatar with laptop" className="w-full" />
+      {/* Hero Section */}
+      <section className="pt-32 pb-16 md:pt-48 md:pb-24 flex flex-col items-center justify-center text-center px-4">
+        <div className="relative">
+          <span className="absolute -left-8 top-0 text-4xl text-purple-400 animate-float">★</span>
+          <h1 className="text-4xl md:text-6xl font-bold animate-slide-up">PORTFOLIO</h1>
+          <h1 className="text-4xl md:text-6xl font-bold mt-2 animate-slide-up" style={{ animationDelay: "0.2s" }}>PRODUCT</h1>
+          <div className="flex items-center justify-center">
+            <h1 className="text-4xl md:text-6xl font-bold mt-2 animate-slide-up" style={{ animationDelay: "0.4s" }}>DESIGNER</h1>
+            <span className="absolute -right-8 text-4xl text-orange-400 animate-float-delay">◆</span>
+          </div>
+          <div className="absolute -top-12 right-0 hidden md:block">
+            <svg className="w-32 h-32 text-yellow-400 animate-draw" viewBox="0 0 100 100">
+              <path d="M10,50 Q30,30 50,50 T90,50" fill="none" stroke="currentColor" strokeWidth="4" />
+            </svg>
+          </div>
+          <div className="absolute -left-12 bottom-8 hidden md:block">
+            <div className="w-6 h-6 bg-teal-400 rotate-45 animate-bounce-slow"></div>
           </div>
         </div>
         
-        <div className="text-center mb-8 animate-fadeIn">
-          <h1 className="text-5xl md:text-6xl font-bold mb-2">
-            <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">Abdoul Khoudoss!</span>
-          </h1>
-          <p className="text-xl text-gray-400">
-            <span className="typed-text">Je code & je me détends 🍧</span>
-          </p>
-        </div>
-        
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-12 animate-fadeIn animation-delay-300">
-          <div className="flex gap-2">
-            <span className="bg-gray-800 px-3 py-1 rounded-full text-blue-400 flex items-center">
-              <span className="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
-              React Native
-            </span>
-            <span className="bg-gray-800 px-3 py-1 rounded-full text-purple-400 flex items-center">
-              <span className="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
-              WebRTC
-            </span>
+        <button 
+          onClick={() => scrollToSection(introRef)} 
+          className="mt-16 flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-700 transition transform hover:scale-105 animate-fade-in"
+          style={{ animationDelay: "0.8s" }}
+        >
+          En savoir plus <ChevronDown size={18} />
+        </button>
+      </section>
+
+      {/* Introduction Section */}
+      <section id="intro" ref={introRef} className={`px-6 md:px-16 py-16 md:py-24 ${animationClass("intro")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-purple-400 rounded-full mr-4 flex-shrink-0"></span>
+          INTRODUCTION
+        </h2>
+        <div className="flex flex-col md:flex-row gap-8">
+          <div className="w-full md:w-1/3">
+            <div className="bg-gray-100 p-6 rounded-lg flex items-center justify-center h-full transform hover:scale-105 transition-transform duration-300">
+              <div className="w-full aspect-square bg-gray-200 rounded-md flex items-center justify-center overflow-hidden">
+                <div className="w-48 h-48 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center text-white text-5xl">
+                  <User className="w-24 h-24" />
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <span className="bg-gray-800 px-3 py-1 rounded-full text-green-400 flex items-center">
-              <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
-              React.js
-            </span>
-            <span className="bg-gray-800 px-3 py-1 rounded-full text-yellow-400 flex items-center">
-              <span className="w-2 h-2 bg-yellow-400 rounded-full mr-2"></span>
-              TypeScript
-            </span>
-          </div>
-        </div>
-        
-        <p className="text-center text-gray-300 max-w-2xl mb-10 animate-fadeIn animation-delay-500 leading-relaxed">
-          Développeur passionné spécialisé dans <span className="text-blue-400">React Native</span>, 
-          je crée des applications mobiles <span className="text-purple-400">élégantes</span> et 
-          <span className="text-green-400"> conviviales</span>. Mon objectif est de transformer des idées 
-          en expériences digitales captivantes qui résolvent des problèmes réels.
-        </p>
-        
-        <div className="flex gap-4 animate-fadeIn animation-delay-700">
-          <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full hover:shadow-lg hover:shadow-blue-500/30 transition transform hover:-translate-y-1">
-            Me Contacter
-          </button>
-          <button className="bg-transparent border border-white text-white px-6 py-3 rounded-full hover:bg-white hover:text-black transition transform hover:-translate-y-1">
-            Mon CV
-          </button>
-        </div>
-        
-        {/* Scroll down indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-          </svg>
-        </div>
-        
-        {/* Activity Stats */}
-        <div className="absolute bottom-20 right-4 md:right-20 hidden md:flex flex-col items-center">
-          <div className="transform -rotate-90 mb-4 text-sm text-gray-400">ACTIVITÉS</div>
-          <div className="h-32 flex items-end space-x-1">
-            <div className="w-1 h-6 bg-blue-400 rounded-t animate-bar-1"></div>
-            <div className="w-1 h-12 bg-blue-400 rounded-t animate-bar-2"></div>
-            <div className="w-1 h-8 bg-blue-400 rounded-t animate-bar-3"></div>
-            <div className="w-1 h-16 bg-blue-400 rounded-t animate-bar-4"></div>
-            <div className="w-1 h-10 bg-blue-400 rounded-t animate-bar-5"></div>
-          </div>
-        </div>
-        
-        {/* Tech dots */}
-        <div className="absolute top-40 left-4 md:left-20 hidden md:block">
-          <div className="flex flex-col gap-4">
-            <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
-            <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse delay-150"></div>
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse delay-300"></div>
-            <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse delay-500"></div>
+          <div className="w-full md:w-2/3">
+            <p className="text-gray-700 mb-6 text-lg leading-relaxed">
+              Je suis un designer produit passionné avec plus de 5 ans d'expérience dans la création d'interfaces utilisateur intuitives et esthétiques. Ma mission est de résoudre des problèmes complexes à travers un design centré sur l'utilisateur.
+            </p>
+            <p className="text-gray-700 text-lg leading-relaxed">
+              Spécialisé dans les applications mobiles et les plateformes SaaS, j'applique une approche méthodique qui combine recherche utilisateur, prototypage itératif et tests d'utilisabilité pour créer des expériences mémorables qui répondent aux besoins des utilisateurs tout en atteignant les objectifs commerciaux.
+            </p>
+            <div className="mt-8 flex gap-4">
+              <button className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition flex items-center gap-2">
+                Mon CV <ArrowRight size={16} />
+              </button>
+              <button className="border border-purple-600 text-purple-600 px-6 py-3 rounded-lg hover:bg-purple-50 transition">
+                Me contacter
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Mes Expériences Section */}
-      <section id="experiences" className="max-w-6xl mx-auto px-4 py-20 relative">
-        <h2 className="text-4xl font-bold mb-1 text-center">MES EXPÉRIENCES</h2>
-        <p className="text-sm text-gray-400 mb-12 text-center">EXPLORER MAINTENANT</p>
+      {/* Work Experience Section */}
+      <section id="experience" ref={experienceRef} className={`px-6 md:px-16 py-16 md:py-24 bg-white ${animationClass("experience")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-orange-400 rounded-full mr-4 flex-shrink-0"></span>
+          MES EXPÉRIENCES
+        </h2>
         
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-10">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-xl font-bold">WebRTC / Développeur Logiciel</h3>
-              <span className="text-gray-400">MAI 2022 - PRÉSENT, HYDERABAD</span>
+        <div className="space-y-12">
+          {/* Experience 1 */}
+          <div className="flex flex-col md:flex-row items-start gap-6 md:gap-8 group">
+            <div className="w-16 h-16 bg-purple-100 flex items-center justify-center rounded-lg shadow-md transform group-hover:scale-110 transition-transform duration-300">
+              <Briefcase className="text-purple-600" />
             </div>
-            
-            <p className="text-gray-300 mb-4">
-              Actuellement, je travaille sur des applications basées sur WebRTC. WebRTC est un projet Open Source facilitant le streaming en direct à très faible latence, 
-              WebRTC est le meilleur de sa catégorie pour la vidéoconférence et la communication peer-to-peer. J'ai une solide expérience dans la création de layouts et d'applications réactifs.
-            </p>
-            
-            <p className="text-gray-300">
-              En tant que développeur React Native, j'ai de l'expérience dans la création d'applications pour les plateformes Android et iOS. De plus, ma compétence en React JS m'a doté des compétences nécessaires pour créer des pages web rapides, évolutives et dynamiques avec d'excellentes expériences utilisateur.
-            </p>
-            
-            <div className="flex flex-wrap gap-2 mt-6">
-              <span className="bg-gray-800 text-xs px-3 py-1 rounded-full">React Native</span>
-              <span className="bg-gray-800 text-xs px-3 py-1 rounded-full">React.js</span>
-              <span className="bg-gray-800 text-xs px-3 py-1 rounded-full">WebRTC</span>
-              <span className="bg-gray-800 text-xs px-3 py-1 rounded-full">TypeScript</span>
+            <div className="flex-1">
+              <div className="text-sm text-gray-500 mb-1">Mars 2023 - Présent</div>
+              <h3 className="font-bold text-xl mb-3">Novus Design - Senior Product Designer</h3>
+              <p className="text-gray-700">
+                Conception et amélioration d'interfaces utilisateur pour plusieurs produits SaaS à forte croissance. Direction d'une équipe de 3 designers juniors et collaboration étroite avec les équipes produit et développement. Mise en place d'un système de design évolutif qui a permis d'accélérer le processus de développement de 40%.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <SkillTag>UX Design</SkillTag>
+                <SkillTag>UI Design</SkillTag>
+                <SkillTag>Management</SkillTag>
+                <SkillTag>Design Systems</SkillTag>
+              </div>
+            </div>
+          </div>
+          
+          {/* Experience 2 */}
+          <div className="flex flex-col md:flex-row items-start gap-6 md:gap-8 group">
+            <div className="w-16 h-16 bg-blue-100 flex items-center justify-center rounded-lg shadow-md transform group-hover:scale-110 transition-transform duration-300">
+              <Briefcase className="text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm text-gray-500 mb-1">Juin 2021 - Février 2023</div>
+              <h3 className="font-bold text-xl mb-3">Apex Interactive - UI/UX Designer</h3>
+              <p className="text-gray-700">
+                Conception d'interfaces pour applications mobiles et web dans les secteurs de la finance et de la santé. Réalisation d'une refonte complète d'une application de banque mobile qui a augmenté l'engagement utilisateur de 35%. Mise en place de processus de recherche utilisateur et de tests d'utilisabilité.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <SkillTag>Mobile Design</SkillTag>
+                <SkillTag>User Research</SkillTag>
+                <SkillTag>Wireframing</SkillTag>
+                <SkillTag>Prototyping</SkillTag>
+              </div>
+            </div>
+          </div>
+          
+          {/* Experience 3 */}
+          <div className="flex flex-col md:flex-row items-start gap-6 md:gap-8 group">
+            <div className="w-16 h-16 bg-green-100 flex items-center justify-center rounded-lg shadow-md transform group-hover:scale-110 transition-transform duration-300">
+              <Briefcase className="text-green-600" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm text-gray-500 mb-1">Janvier - Mai 2021</div>
+              <h3 className="font-bold text-xl mb-3">Prism Digital - Product Design Intern</h3>
+              <p className="text-gray-700">
+                Stage de fin d'études focalisé sur l'amélioration de l'expérience utilisateur d'une plateforme e-commerce. Collaboration avec les équipes marketing et développement pour implémenter des designs centrés sur l'augmentation des conversions.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <SkillTag>E-commerce</SkillTag>
+                <SkillTag>Conversion Design</SkillTag>
+                <SkillTag>A/B Testing</SkillTag>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Soft Skills Section */}
-      <section id="soft-skills" className="max-w-6xl mx-auto px-4 py-20 relative">
-        <h2 className="text-4xl font-bold mb-1 text-center">SOFT SKILLS</h2>
-        <p className="text-sm text-gray-400 mb-12 text-center">MES COMPÉTENCES PERSONNELLES</p>
+      <section id="softSkills" ref={softSkillsRef} className={`px-6 md:px-16 py-16 md:py-24 bg-[#f5f5f5] ${animationClass("softSkills")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-teal-400 rounded-full mr-4 flex-shrink-0"></span>
+          SOFT SKILLS
+        </h2>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <div className="text-center">
-            <div className="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <h3 className="font-bold mb-2">Communication</h3>
-            <p className="text-gray-400 text-sm">Expression claire et écoute active</p>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <SoftSkillCard icon={<User />} color="bg-purple-400" skill="Empathie" description="Capacité à comprendre et partager les sentiments des utilisateurs." />
           
-          <div className="text-center">
-            <div className="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-            </div>
-            <h3 className="font-bold mb-2">Résolution de problèmes</h3>
-            <p className="text-gray-400 text-sm">Analyse et solutions créatives</p>
-          </div>
+          <SoftSkillCard icon={<Mail />} color="bg-blue-400" skill="Communication" description="Expression claire des idées et concepts complexes." />
           
-          <div className="text-center">
-            <div className="w-24 h-24 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-              </svg>
-            </div>
-            <h3 className="font-bold mb-2">Travail d'équipe</h3>
-            <p className="text-gray-400 text-sm">Collaboration et adaptabilité</p>
-          </div>
+          <SoftSkillCard icon={<Users />} color="bg-orange-400" skill="Travail d'équipe" description="Collaboration efficace avec les équipes pluridisciplinaires." />
+          
+          <SoftSkillCard icon={<Lightbulb />} color="bg-yellow-400" skill="Résolution de problèmes" description="Approche analytique pour trouver des solutions innovantes." />
+          
+          <SoftSkillCard icon={<RefreshCw />} color="bg-green-400" skill="Adaptabilité" description="Flexibilité face aux changements et nouveaux défis." />
+          
+          <SoftSkillCard icon={<Palette />} color="bg-pink-400" skill="Créativité" description="Génération d'idées originales et innovantes." />
+          
+          <SoftSkillCard icon={<Award />} color="bg-indigo-400" skill="Leadership" description="Capacité à guider et inspirer une équipe." />
+          
+          <SoftSkillCard icon={<Clock />} color="bg-red-400" skill="Gestion du temps" description="Organisation efficace des priorités et des délais." />
         </div>
       </section>
 
-      {/* Mes Formations Section */}
-      <section id="formations" className="max-w-6xl mx-auto px-4 py-20 relative">
-        <h2 className="text-4xl font-bold mb-1 text-center">MES FORMATIONS</h2>
-        <p className="text-sm text-gray-400 mb-12 text-center">PARCOURS ÉDUCATIF</p>
+      {/* Formations Section */}
+      <section id="formations" ref={formationsRef} className={`px-6 md:px-16 py-16 md:py-24 bg-white ${animationClass("formations")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-yellow-400 rounded-full mr-4 flex-shrink-0"></span>
+          MES FORMATIONS
+        </h2>
         
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-10 border-l-2 border-gray-800 pl-6 relative">
-            <div className="absolute w-4 h-4 bg-gray-800 rounded-full -left-2 top-0"></div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Master en Développement Web</h3>
-              <p className="text-gray-400">Université des Technologies | 2018 - 2020</p>
-            </div>
-            <p className="text-gray-300">
-              Spécialisation en technologies front-end modernes et architecture d'applications.
-            </p>
-          </div>
-          
-          <div className="border-l-2 border-gray-800 pl-6 relative">
-            <div className="absolute w-4 h-4 bg-gray-800 rounded-full -left-2 top-0"></div>
-            <div className="mb-4">
-              <h3 className="text-xl font-bold">Licence en Informatique</h3>
-              <p className="text-gray-400">Institut des Sciences | 2015 - 2018</p>
-            </div>
-            <p className="text-gray-300">
-              Formation en algorithmique, programmation et bases de données.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Projets Section */}
-      <section id="projets" className="max-w-6xl mx-auto px-4 py-20 relative">
-        <h2 className="text-4xl font-bold mb-1 text-center">PROJETS</h2>
-        <p className="text-sm text-gray-400 mb-12 text-center">DÉCOUVRIR MAINTENANT</p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {/* Projet 1 */}
-          <div className="bg-gray-900 rounded-lg p-6 flex items-center">
-            <div className="mr-4">
-              <img src="/api/placeholder/50/50" alt="WebRTC" className="w-12 h-12 rounded" />
-            </div>
-            <div>
-              <h3 className="font-bold mb-1">WebRTC</h3>
-              <p className="text-sm text-gray-400">Projet de communication en temps réel open-source</p>
-            </div>
-          </div>
-          
-          {/* Projet 2 */}
-          <div className="bg-gray-900 rounded-lg p-6 flex items-center">
-            <div className="mr-4">
-              <img src="/api/placeholder/50/50" alt="HireSlide" className="w-12 h-12 rounded" />
-            </div>
-            <div>
-              <h3 className="font-bold mb-1">HireSlide</h3>
-              <p className="text-sm text-gray-400">Plateforme de recrutement pour développeurs</p>
-            </div>
-          </div>
-          
-          {/* Projet 3 */}
-          <div className="bg-gray-900 rounded-lg p-6 flex items-center">
-            <div className="mr-4">
-              <img src="/api/placeholder/50/50" alt="Verge Systems" className="w-12 h-12 rounded" />
-            </div>
-            <div>
-              <h3 className="font-bold mb-1">Verge Systems</h3>
-              <p className="text-sm text-gray-400">Solutions logicielles d'entreprise</p>
-            </div>
-          </div>
-          
-          {/* Projet 4 */}
-          <div className="bg-gray-900 rounded-lg p-6 flex items-center">
-            <div className="mr-4">
-              <img src="/api/placeholder/50/50" alt="Payoasis" className="w-12 h-12 rounded" />
-            </div>
-            <div>
-              <h3 className="font-bold mb-1">Payoasis</h3>
-              <p className="text-sm text-gray-400">Solution sécurisée de traitement des paiements</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Éducation & Certifications Section */}
-      <section id="education" className="max-w-6xl mx-auto px-4 py-20 relative">
-        <h2 className="text-4xl font-bold mb-1 text-center">ÉDUCATION & CERTIFICATIONS</h2>
-        <p className="text-sm text-gray-400 mb-12 text-center">QUALIFICATIONS</p>
-        
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h3 className="text-xl font-bold mb-2">Certifications</h3>
-            <div className="space-y-4">
-              <div className="bg-gray-900 p-4 rounded-lg">
-                <div className="flex justify-between mb-2">
-                  <h4 className="font-medium">AWS Certified Developer</h4>
-                  <span className="text-gray-400">2023</span>
-                </div>
-                <p className="text-sm text-gray-300">Amazon Web Services</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-lg shadow-sm transform hover:scale-105 transition-transform duration-300">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
+                <Book className="text-purple-600" />
               </div>
-              
-              <div className="bg-gray-900 p-4 rounded-lg">
-                <div className="flex justify-between mb-2">
-                  <h4 className="font-medium">React Native Specialist</h4>
-                  <span className="text-gray-400">2022</span>
-                </div>
-                <p className="text-sm text-gray-300">Meta Developer Certification</p>
+              <div>
+                <div className="text-sm text-gray-500">2020 - 2023</div>
+                <h3 className="font-bold text-xl mt-1">Master en Design Produit</h3>
+                <p className="text-gray-600 mt-2">Université de Design, Paris</p>
+                <p className="text-gray-700 mt-4">Formation axée sur l'UX/UI design, la recherche utilisateur et la stratégie produit. Projet de fin d'études sur les interfaces accessibles pour applications bancaires.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-8 rounded-lg shadow-sm transform hover:scale-105 transition-transform duration-300">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-amber-200 rounded-full flex items-center justify-center flex-shrink-0">
+                <Book className="text-amber-600" />
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">2017 - 2020</div>
+                <h3 className="font-bold text-xl mt-1">Licence en Design Graphique</h3>
+                <p className="text-gray-600 mt-2">École des Arts Visuels, Lyon</p>
+                <p className="text-gray-700 mt-4">Fondamentaux du design graphique, typographie, composition et initiation au design d'interfaces. Spécialisation en design digital pendant la dernière année.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Projects Section */}
+      <section id="projects" ref={projectsRef} className={`px-6 md:px-16 py-16 md:py-24 bg-[#f5f5f5] ${animationClass("projects")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-blue-400 rounded-full mr-4 flex-shrink-0"></span>
+          PROJETS
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Project 1 */}
+          <ProjectCard 
+            number="01" 
+            title="FINANCE APP REDESIGN" 
+            color="bg-purple-400" 
+            description="Reimagining the mobile banking experience with intuitive navigation and personalized insights"
+            delay="0s" 
+          />
+          
+          {/* Project 2 */}
+          <ProjectCard 
+            number="02" 
+            title="DESIGN SYSTEM" 
+            color="bg-yellow-400" 
+            description="Creating a comprehensive component library and design guidelines for a SaaS platform"
+            delay="0.1s" 
+          />
+          
+          {/* Project 3 */}
+          <ProjectCard 
+            number="03" 
+            title="E-COMMERCE UX" 
+            color="bg-orange-400" 
+            description="Optimizing the shopping experience with user research and conversion-focused design"
+            delay="0.2s" 
+          />
+          
+          {/* Project 4 */}
+          <ProjectCard 
+            number="04" 
+            title="AR PROTOTYPE" 
+            color="bg-teal-400" 
+            description="Exploring augmented reality interfaces for an immersive product visualization tool"
+            delay="0.3s" 
+          />
+        </div>
+        
+        <div className="mt-16">
+          <ProjectShowcase />
+        </div>
+      </section>
+
+      {/* Education & Certifications Section */}
+      <section id="education" ref={educationRef} className={`px-6 md:px-16 py-16 md:py-24 bg-white ${animationClass("education")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-indigo-400 rounded-full mr-4 flex-shrink-0"></span>
+          ÉDUCATION & CERTIFICATIONS
+        </h2>
+        
+        <div className="space-y-12">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 group">
+            <div className="w-16 h-16 bg-indigo-100 flex items-center justify-center rounded-lg shadow-md transform group-hover:scale-110 transition-transform duration-300">
+              <Award className="text-indigo-600" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm text-gray-500 mb-1">2023</div>
+              <h3 className="font-bold text-xl mb-3">Certification Google UX Design</h3>
+              <p className="text-gray-600 mt-1">Coursera</p>
+              <p className="text-gray-700 mt-4">
+                Programme complet de Google couvrant les méthodologies UX, le design thinking, la recherche utilisateur, le wireframing, le prototypage et les tests d'utilisabilité. Projet final sur une application de gestion de budget personnel.
+              </p>
+              <div className="mt-6">
+                <a href="#" className="text-indigo-600 flex items-center gap-2 hover:underline">
+                  Voir le certificat <ArrowRight size={16} />
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 group">
+            <div className="w-16 h-16 bg-pink-100 flex items-center justify-center rounded-lg shadow-md transform group-hover:scale-110 transition-transform duration-300">
+              <Award className="text-pink-600" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm text-gray-500 mb-1">2022</div>
+              <h3 className="font-bold text-xl mb-3">Design Systems Certification</h3>
+              <p className="text-gray-600 mt-1">Design+Code</p>
+              <p className="text-gray-700 mt-4">
+                Formation approfondie sur la création et la gestion de systèmes de design. Conception de composants réutilisables, établissement de directives de design et implémentation d'un système de design dans Figma.
+              </p>
+              <div className="mt-6">
+                <a href="#" className="text-pink-600 flex items-center gap-2 hover:underline">
+                  Voir le certificat <ArrowRight size={16} />
+                </a>
               </div>
             </div>
           </div>
@@ -358,210 +457,565 @@ export default function Portfolio() {
       </section>
 
       {/* Témoignages Section */}
-      <section id="temoignages" className="max-w-6xl mx-auto px-4 py-20 relative">
-        <h2 className="text-4xl font-bold mb-1 text-center">TÉMOIGNAGES</h2>
-        <p className="text-sm text-gray-400 mb-12 text-center">CE QU'ILS DISENT</p>
+      <section id="testimonies" ref={testimoniesRef} className={`px-6 md:px-16 py-16 md:py-24 bg-[#f5f5f5] ${animationClass("testimonies")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-green-400 rounded-full mr-4 flex-shrink-0"></span>
+          TÉMOIGNAGES
+        </h2>
         
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-900 p-6 rounded-lg">
-              <p className="text-gray-300 italic mb-4">
-                "Ibrahim a livré un travail exceptionnel sur notre application mobile. Son expertise en React Native a permis de créer une interface utilisateur fluide et intuitive."
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-8 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300">
+            <div className="mb-8">
+              <Star className="text-yellow-500 mb-4" />
+              <p className="text-gray-800 italic">
+                "Working with this designer was transformative for our product. The design system they created has accelerated our development cycles by 40% and ensured consistent experiences across all our platforms."
               </p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-800 rounded-full mr-4"></div>
-                <div>
-                  <h4 className="font-bold">Sarah Dupont</h4>
-                  <p className="text-sm text-gray-400">Directrice Produit, TechVision</p>
-                </div>
-              </div>
             </div>
-            
-            <div className="bg-gray-900 p-6 rounded-lg">
-              <p className="text-gray-300 italic mb-4">
-                "Excellent développeur avec une capacité remarquable à résoudre des problèmes complexes. Son travail sur notre solution WebRTC a été crucial pour notre produit."
-              </p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-800 rounded-full mr-4"></div>
-                <div>
-                  <h4 className="font-bold">Marc Laurent</h4>
-                  <p className="text-sm text-gray-400">CTO, StreamConnect</p>
-                </div>
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-purple-300 rounded-full overflow-hidden">
+                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600"></div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Blog ou Publications Section */}
-      <section id="blog" className="max-w-6xl mx-auto px-4 py-20 relative">
-        <h2 className="text-4xl font-bold mb-1 text-center">BLOG OU PUBLICATIONS</h2>
-        <p className="text-sm text-gray-400 mb-12 text-center">MES ARTICLES</p>
-        
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gray-900 rounded-lg overflow-hidden">
-              <div className="h-48 bg-gray-800"></div>
-              <div className="p-6">
-                <span className="text-sm text-gray-400">12 Mars 2024</span>
-                <h3 className="text-xl font-bold my-2">Optimiser les performances de React Native</h3>
-                <p className="text-gray-300 mb-4">Découvrez comment améliorer les performances de vos applications React Native avec ces techniques avancées.</p>
-                <a href="#" className="text-blue-400 hover:underline">Lire l'article →</a>
-              </div>
-            </div>
-            
-            <div className="bg-gray-900 rounded-lg overflow-hidden">
-              <div className="h-48 bg-gray-800"></div>
-              <div className="p-6">
-                <span className="text-sm text-gray-400">25 Février 2024</span>
-                <h3 className="text-xl font-bold my-2">Introduction à WebRTC pour les développeurs</h3>
-                <p className="text-gray-300 mb-4">Un guide complet pour comprendre et implémenter WebRTC dans vos applications web et mobiles.</p>
-                <a href="#" className="text-blue-400 hover:underline">Lire l'article →</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Autres Sections */}
-      <section id="autres" className="max-w-6xl mx-auto px-4 py-20 relative">
-        <h2 className="text-4xl font-bold mb-1 text-center">AUTRES SECTIONS</h2>
-        <p className="text-sm text-gray-400 mb-12 text-center">INFORMATIONS COMPLÉMENTAIRES</p>
-        
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-gray-900 p-6 rounded-lg mb-6">
-            <h3 className="text-xl font-bold mb-4">Langues</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span>Français</span>
-                <div className="flex space-x-1">
-                  <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>Anglais</span>
-                <div className="flex space-x-1">
-                  <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-blue-400 rounded-full"></div>
-                  <div className="w-4 h-4 bg-gray-700 rounded-full"></div>
-                </div>
+              <div className="ml-4">
+                <p className="font-bold">Alexander Chen</p>
+                <p className="text-sm text-gray-600">CTO at WonderTech</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-gray-900 p-6 rounded-lg">
-            <h3 className="text-xl font-bold mb-4">Centres d'intérêt</h3>
-            <div className="flex flex-wrap gap-2">
-              <span className="bg-gray-800 px-3 py-1 rounded-full">Photographie</span>
-              <span className="bg-gray-800 px-3 py-1 rounded-full">Voyage</span>
-              <span className="bg-gray-800 px-3 py-1 rounded-full">Nouvelles technologies</span>
-              <span className="bg-gray-800 px-3 py-1 rounded-full">Lecture</span>
-              <span className="bg-gray-800 px-3 py-1 rounded-full">Cuisine</span>
+          <div className="bg-gradient-to-br from-amber-50 to-amber-200 p-8 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300">
+            <div className="mb-8">
+              <Star className="text-yellow-500 mb-4" />
+              <p className="text-gray-800 italic">
+                "The redesign completely transformed our user experience. Conversion rates increased by 37% and user satisfaction scores jumped to 4.8/5. Exactly what our product needed."
+              </p>
+            </div>
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-amber-300 rounded-full overflow-hidden">
+                <div className="w-full h-full bg-gradient-to-br from-amber-400 to-amber-600"></div>
+              </div>
+              <div className="ml-4">
+                <p className="font-bold">Sarah Johnson</p>
+                <p className="text-sm text-gray-600">Product Manager at MobiTech</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-blue-50 to-blue-200 p-8 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300">
+            <div className="mb-8">
+            <p className="text-gray-800 italic">
+                "The user research and iterative design approach they implemented completely transformed how we think about product development. Our team now has a much deeper understanding of our users' needs."
+              </p>
+            </div>
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-blue-300 rounded-full overflow-hidden">
+                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600"></div>
+              </div>
+              <div className="ml-4">
+                <p className="font-bold">Michael Rodriguez</p>
+                <p className="text-sm text-gray-600">Head of Product at Innovate Inc.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-green-50 to-green-200 p-8 rounded-lg shadow-md transform hover:scale-105 transition-transform duration-300">
+            <div className="mb-8">
+              <Star className="text-yellow-500 mb-4" />
+              <p className="text-gray-800 italic">
+                "Their design thinking workshops have empowered our team to approach problems in completely new ways. The impact has gone beyond just design—it's changed our company culture for the better."
+              </p>
+            </div>
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-green-300 rounded-full overflow-hidden">
+                <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600"></div>
+              </div>
+              <div className="ml-4">
+                <p className="font-bold">Lisa Wang</p>
+                <p className="text-sm text-gray-600">Design Lead at Creative Solutions</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Section Contact */}
-      <section id="contact" className="max-w-6xl mx-auto px-4 py-20 relative">
-        <h2 className="text-4xl font-bold mb-1 text-center">CONTACT</h2>
-        <p className="text-sm text-gray-400 mb-12 text-center">PRENEZ CONTACT AVEC MOI</p>
+      {/* Blog Section */}
+      <section id="blog" ref={blogRef} className={`px-6 md:px-16 py-16 md:py-24 bg-white ${animationClass("blog")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-red-400 rounded-full mr-4 flex-shrink-0"></span>
+          BLOG
+        </h2>
         
-        <div className="max-w-2xl mx-auto bg-gray-900 p-8 rounded-lg">
-          <form className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium mb-2">Nom</label>
-              <input 
-                type="text" 
-                id="name" 
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Votre nom"
-              />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300">
+            <div className="h-48 bg-purple-100 relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 bg-purple-200 rounded-full flex items-center justify-center">
+                  <Book className="text-purple-600" />
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="text-xs text-gray-500 mb-2">12 Mars 2024</div>
+              <h3 className="font-bold text-lg mb-3">L'avenir du design d'interfaces : IA et personnalisation</h3>
+              <p className="text-gray-700 text-sm mb-4">
+                Comment l'intelligence artificielle transformera la création d'expériences utilisateur personnalisées dans les années à venir.
+              </p>
+              <a href="#" className="text-purple-600 text-sm flex items-center gap-1 hover:underline">
+                Lire plus <ArrowRight size={14} />
+              </a>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300">
+            <div className="h-48 bg-blue-100 relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 bg-blue-200 rounded-full flex items-center justify-center">
+                  <Code className="text-blue-600" />
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="text-xs text-gray-500 mb-2">26 Février 2024</div>
+              <h3 className="font-bold text-lg mb-3">Design Systems : la clé d'une collaboration efficace</h3>
+              <p className="text-gray-700 text-sm mb-4">
+                Pourquoi les systèmes de design sont essentiels pour faciliter la communication entre designers et développeurs.
+              </p>
+              <a href="#" className="text-blue-600 text-sm flex items-center gap-1 hover:underline">
+                Lire plus <ArrowRight size={14} />
+              </a>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300">
+            <div className="h-48 bg-green-100 relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 bg-green-200 rounded-full flex items-center justify-center">
+                  <Users className="text-green-600" />
+                </div>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="text-xs text-gray-500 mb-2">10 Janvier 2024</div>
+              <h3 className="font-bold text-lg mb-3">L'accessibilité n'est pas une option : concevoir pour tous</h3>
+              <p className="text-gray-700 text-sm mb-4">
+                Comment intégrer les principes d'accessibilité dès le début du processus de conception pour créer des produits inclusifs.
+              </p>
+              <a href="#" className="text-green-600 text-sm flex items-center gap-1 hover:underline">
+                Lire plus <ArrowRight size={14} />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Other Section */}
+      <section id="other" ref={otherRef} className={`px-6 md:px-16 py-16 md:py-24 bg-[#f5f5f5] ${animationClass("other")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-pink-400 rounded-full mr-4 flex-shrink-0"></span>
+          AUTRES
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition">
+            <h3 className="font-bold text-xl mb-6">Outils préférés</h3>
+            <div className="grid grid-cols-2 gap-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-md flex items-center justify-center">
+                  <span className="text-purple-600 font-bold">Fg</span>
+                </div>
+                <span className="text-gray-700">Figma</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-md flex items-center justify-center">
+                  <span className="text-blue-600 font-bold">Sk</span>
+                </div>
+                <span className="text-gray-700">Sketch</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-800 rounded-md flex items-center justify-center">
+                  <span className="text-white font-bold">Ps</span>
+                </div>
+                <span className="text-gray-700">Photoshop</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-md flex items-center justify-center">
+                  <span className="text-orange-600 font-bold">Ai</span>
+                </div>
+                <span className="text-gray-700">Illustrator</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-100 rounded-md flex items-center justify-center">
+                  <span className="text-indigo-600 font-bold">Pr</span>
+                </div>
+                <span className="text-gray-700">Principle</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-teal-100 rounded-md flex items-center justify-center">
+                  <span className="text-teal-600 font-bold">Mx</span>
+                </div>
+                <span className="text-gray-700">Miro</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition">
+            <h3 className="font-bold text-xl mb-6">Intérêts personnels</h3>
+            <div className="grid grid-cols-2 gap-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-md flex items-center justify-center">
+                  <span className="text-purple-600 font-bold">Ph</span>
+                </div>
+                <span className="text-gray-700">Photographie</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-md flex items-center justify-center">
+                  <span className="text-green-600 font-bold">Tr</span>
+                </div>
+                <span className="text-gray-700">Voyages</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 rounded-md flex items-center justify-center">
+                  <span className="text-amber-600 font-bold">Ck</span>
+                </div>
+                <span className="text-gray-700">Cuisine</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-100 rounded-md flex items-center justify-center">
+                  <span className="text-red-600 font-bold">Cy</span>
+                </div>
+                <span className="text-gray-700">Cyclisme</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-md flex items-center justify-center">
+                  <span className="text-blue-600 font-bold">Rd</span>
+                </div>
+                <span className="text-gray-700">Lecture</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-violet-100 rounded-md flex items-center justify-center">
+                  <span className="text-violet-600 font-bold">Ar</span>
+                </div>
+                <span className="text-gray-700">Art contemporain</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Skills Section */}
+      <section id="skills" ref={skillsRef} className={`px-6 md:px-16 py-16 md:py-24 bg-white ${animationClass("skills")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-violet-400 rounded-full mr-4 flex-shrink-0"></span>
+          COMPÉTENCES
+        </h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-lg shadow-sm">
+            <h3 className="font-bold text-lg mb-6 text-purple-700">Design UX/UI</h3>
+            <div className="space-y-4">
+              <SkillBar skill="Wireframing & Prototyping" percentage={95} color="bg-purple-500" />
+              <SkillBar skill="User Research & Testing" percentage={90} color="bg-purple-500" />
+              <SkillBar skill="Interaction Design" percentage={85} color="bg-purple-500" />
+              <SkillBar skill="Information Architecture" percentage={80} color="bg-purple-500" />
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-lg shadow-sm">
+            <h3 className="font-bold text-lg mb-6 text-blue-700">Design Visuel</h3>
+            <div className="space-y-4">
+              <SkillBar skill="UI Design" percentage={95} color="bg-blue-500" />
+              <SkillBar skill="Design Systems" percentage={90} color="bg-blue-500" />
+              <SkillBar skill="Typography" percentage={85} color="bg-blue-500" />
+              <SkillBar skill="Iconographie" percentage={80} color="bg-blue-500" />
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-lg shadow-sm">
+            <h3 className="font-bold text-lg mb-6 text-green-700">Compétences Techniques</h3>
+            <div className="space-y-4">
+              <SkillBar skill="HTML & CSS" percentage={80} color="bg-green-500" />
+              <SkillBar skill="JavaScript" percentage={70} color="bg-green-500" />
+              <SkillBar skill="React" percentage={65} color="bg-green-500" />
+              <SkillBar skill="Animation & Motion" percentage={75} color="bg-green-500" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" ref={contactRef} className={`px-6 md:px-16 py-16 md:py-24 bg-[#f5f5f5] ${animationClass("contact")}`}>
+        <h2 className="text-2xl md:text-3xl font-bold mb-12 flex items-center">
+          <span className="w-8 h-8 bg-blue-400 rounded-full mr-4 flex-shrink-0"></span>
+          CONTACT
+        </h2>
+        
+        <div className="flex flex-col md:flex-row gap-8">
+          <div className="w-full md:w-1/3 bg-white p-8 rounded-lg shadow-md">
+            <h3 className="font-bold text-xl mb-6">Informations de contact</h3>
+            
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Mail className="text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium">contact@portfolio.com</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Phone className="text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Téléphone</p>
+                  <p className="font-medium">+33 6 12 34 56 78</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <MapPin className="text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Localisation</p>
+                  <p className="font-medium">Paris, France</p>
+                </div>
+              </div>
             </div>
             
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
-              <input 
-                type="email" 
-                id="email" 
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="votre@email.com"
-              />
+            <div className="mt-8">
+              <h4 className="font-medium mb-4">Réseaux sociaux</h4>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-purple-100 transition">
+                  <div className="text-gray-600 hover:text-purple-600">Li</div>
+                </a>
+                <a href="#" className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-blue-100 transition">
+                  <div className="text-gray-600 hover:text-blue-600">Tw</div>
+                </a>
+                <a href="#" className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-pink-100 transition">
+                  <div className="text-gray-600 hover:text-pink-600">In</div>
+                </a>
+                <a href="#" className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-amber-100 transition">
+                  <div className="text-gray-600 hover:text-amber-600">Be</div>
+                </a>
+              </div>
             </div>
+          </div>
+          
+          <div className="w-full md:w-2/3 bg-white p-8 rounded-lg shadow-md">
+            <h3 className="font-bold text-xl mb-6">Envoyez-moi un message</h3>
             
-            <div>
-              <label htmlFor="message" className="block text-sm font-medium mb-2">Message</label>
-              <textarea 
-                id="message" 
-                rows="4" 
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Votre message..."
-              ></textarea>
-            </div>
-            
-            <button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg hover:shadow-lg hover:shadow-blue-500/30 transition transform hover:-translate-y-1"
-            >
-              Envoyer le message
-            </button>
-          </form>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-6">
+                <label htmlFor="name" className="block text-sm text-gray-600 mb-2">Nom</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Votre nom"
+                  required
+                />
+              </div>
+              
+              <div className="mb-6">
+                <label htmlFor="email" className="block text-sm text-gray-600 mb-2">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Votre email"
+                  required
+                />
+              </div>
+              
+              <div className="mb-6">
+                <label htmlFor="message" className="block text-sm text-gray-600 mb-2">Message</label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows="5"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="Votre message"
+                  required
+                ></textarea>
+              </div>
+              
+              <button
+                type="submit"
+                className="w-full bg-purple-600 text-white font-medium py-3 rounded-lg hover:bg-purple-700 transition"
+              >
+                Envoyer le message
+              </button>
+            </form>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0">
-              <h3 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Abdoul Khoudoss</h3>
-              <p className="text-gray-400 mt-2">Développeur React Native et WebRTC</p>
-            </div>
-            
-            <div className="flex space-x-6 mb-6 md:mb-0">
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                <Github size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                <Linkedin size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                <Twitter size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition">
-                <Instagram size={20} />
-              </a>
-            </div>
+      <footer className="bg-gray-800 text-white px-6 md:px-16 py-12">
+        <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="mb-8 md:mb-0">
+            <div className="font-bold text-xl mb-4">Mon Portfolio</div>
+            <p className="text-gray-400 max-w-md">
+              Designer produit passionné créant des expériences numériques centrées sur l'utilisateur.
+            </p>
           </div>
           
-          <div className="border-t border-gray-800 my-8"></div>
-          
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm mb-4 md:mb-0">© 2024 Ibrahim. Tous droits réservés.</p>
-            
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white text-sm transition">Politique de confidentialité</a>
-              <a href="#" className="text-gray-400 hover:text-white text-sm transition">Conditions d'utilisation</a>
+          <div className="text-center md:text-right">
+            <p className="text-gray-400 mb-4">© 2024 Tous droits réservés</p>
+            <div className="flex gap-4 justify-center md:justify-end">
+              <a href="#" className="text-gray-400 hover:text-white transition">Mentions légales</a>
+              <a href="#" className="text-gray-400 hover:text-white transition">Politique de confidentialité</a>
             </div>
           </div>
         </div>
       </footer>
-
-      {/* Back to top button */}
-      <button 
-        onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}
-        className="fixed bottom-8 right-8 bg-blue-500 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-600 transition"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-        </svg>
-      </button>
     </div>
   );
-}
+};
+
+// Composant pour les tags de compétences
+const SkillTag = ({ children }) => {
+  return (
+    <span className="inline-block bg-gray-100 text-gray-700 rounded-full px-3 py-1 text-sm">
+      {children}
+    </span>
+  );
+};
+
+// Composant pour les barres de compétences
+const SkillBar = ({ skill, percentage, color }) => {
+  return (
+    <div>
+      <div className="flex justify-between mb-1">
+        <span className="text-sm">{skill}</span>
+        <span className="text-sm font-medium">{percentage}%</span>
+      </div>
+      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className={`h-full ${color} rounded-full`} style={{ width: `${percentage}%` }}></div>
+      </div>
+    </div>
+  );
+};
+
+// Composant pour les cartes de projet
+const ProjectCard = ({ number, title, color, description, delay }) => {
+  return (
+    <div 
+      className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition transform hover:scale-105 cursor-pointer animate-fade-in"
+      style={{ animationDelay: delay }}
+    >
+      <div className={`w-12 h-12 ${color} rounded-full flex items-center justify-center text-white mb-4`}>
+        {number}
+      </div>
+      <h3 className="font-bold mb-2">{title}</h3>
+      <p className="text-gray-600 text-sm">{description}</p>
+      <div className="mt-4">
+        <a href="#" className="text-blue-600 text-sm flex items-center gap-1 hover:underline">
+          Voir le projet <ArrowRight size={14} />
+        </a>
+      </div>
+    </div>
+  );
+};
+
+// Composant pour la section de showcase de projet
+const ProjectShowcase = () => {
+  return (
+    <div className="bg-white p-8 rounded-lg shadow-md">
+      <h3 className="font-bold text-xl mb-8">Projet en vedette</h3>
+      <div className="flex flex-col md:flex-row gap-8">
+        <div className="w-full md:w-1/2">
+          <div className="aspect-video bg-gray-100 rounded-lg mb-6 flex items-center justify-center">
+            <div className="text-6xl text-gray-300">
+              <img src="/api/placeholder/600/400" alt="placeholder" />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="aspect-square bg-gray-100 rounded flex items-center justify-center">
+              <div className="text-2xl text-gray-300">01</div>
+            </div>
+            <div className="aspect-square bg-gray-100 rounded flex items-center justify-center">
+              <div className="text-2xl text-gray-300">02</div>
+            </div>
+            <div className="aspect-square bg-gray-100 rounded flex items-center justify-center">
+              <div className="text-2xl text-gray-300">03</div>
+            </div>
+          </div>
+        </div>
+        <div className="w-full md:w-1/2">
+          <h4 className="font-bold text-xl mb-4">Finance App Redesign</h4>
+          <p className="text-gray-700 mb-6">
+            Une refonte complète de l'application mobile pour une grande banque, visant à simplifier la gestion financière quotidienne et à créer une expérience plus engageante pour les utilisateurs.
+          </p>
+          <div className="space-y-4 mb-8">
+            <div>
+              <h5 className="font-medium mb-2">Objectifs</h5>
+              <p className="text-gray-600 text-sm">
+                Améliorer l'engagement des utilisateurs, simplifier les tâches quotidiennes et augmenter l'utilisation des fonctionnalités avancées.
+              </p>
+            </div>
+            <div>
+              <h5 className="font-medium mb-2">Approche</h5>
+              <p className="text-gray-600 text-sm">
+                Recherche utilisateur approfondie, ateliers de co-création avec les clients, prototypage itératif et tests d'utilisabilité réguliers.
+              </p>
+            </div>
+            <div>
+              <h5 className="font-medium mb-2">Résultats</h5>
+              <p className="text-gray-600 text-sm">
+                Augmentation de 35% de l'engagement quotidien, amélioration de 25% du score de satisfaction client (NPS) et réduction de 40% des appels au support client.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 mb-8">
+            <SkillTag>UX Design</SkillTag>
+            <SkillTag>UI Design</SkillTag>
+            <SkillTag>Mobile App</SkillTag>
+            <SkillTag>Fintech</SkillTag>
+          </div>
+          <a 
+            href="#" 
+            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+          >
+            Voir l'étude de cas complète <ArrowRight size={16} />
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Composant pour les cartes de soft skills
+const SoftSkillCard = ({ icon, color, skill, description }) => {
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-sm transform hover:scale-105 transition-transform duration-300">
+      <div className={`w-16 h-16 ${color} rounded-lg flex items-center justify-center text-white mb-4`}>
+        {icon}
+      </div>
+      <h3 className="font-bold mb-2">{skill}</h3>
+      <p className="text-gray-600 text-sm">{description}</p>
+    </div>
+  );
+};
+
+export default Portfolio;

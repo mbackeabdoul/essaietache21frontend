@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaCloudUploadAlt, FaFileAlt, FaTrash } from 'react-icons/fa';
 import { SERVICE_CATEGORIES, INITIAL_SERVICE_STATE } from './serviceData';
-
 
 const LocalServiceModel = () => {
   const [services, setServices] = useState([]);
@@ -11,6 +10,19 @@ const LocalServiceModel = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  // Nettoyer les URLs des prévisualisations lors du démontage du composant
+  useEffect(() => {
+    return () => {
+      // Cleanup function
+      newService.photos.forEach(photo => {
+        if (photo.preview) URL.revokeObjectURL(photo.preview);
+      });
+      newService.certifications.forEach(cert => {
+        if (cert.preview) URL.revokeObjectURL(cert.preview);
+      });
+    };
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewService(prev => ({ ...prev, [name]: value }));
@@ -18,39 +30,53 @@ const LocalServiceModel = () => {
 
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files);
+    const newPhotos = files.map(file => ({
+      file,
+      preview: URL.createObjectURL(file)
+    }));
+    
     setNewService(prev => ({
       ...prev,
-      photos: [...prev.photos, ...files.map(file => ({
-        file: file,
-        preview: URL.createObjectURL(file)
-      }))]
+      photos: [...prev.photos, ...newPhotos]
     }));
   };
 
   const handleCertificationUpload = (e) => {
     const files = Array.from(e.target.files);
+    const newCerts = files.map(file => ({
+      file,
+      name: file.name,
+      preview: URL.createObjectURL(file)
+    }));
+
     setNewService(prev => ({
       ...prev,
-      certifications: [...prev.certifications, ...files.map(file => ({
-        file: file,
-        name: file.name,
-        preview: URL.createObjectURL(file)
-      }))]
+      certifications: [...prev.certifications, ...newCerts]
     }));
   };
 
   const removePhoto = (index) => {
-    setNewService(prev => ({
-      ...prev,
-      photos: prev.photos.filter((_, i) => i !== index)
-    }));
+    setNewService(prev => {
+      const updatedPhotos = [...prev.photos];
+      // Révoquer l'URL de prévisualisation avant de supprimer
+      if (updatedPhotos[index].preview) {
+        URL.revokeObjectURL(updatedPhotos[index].preview);
+      }
+      updatedPhotos.splice(index, 1);
+      return { ...prev, photos: updatedPhotos };
+    });
   };
 
   const removeCertification = (index) => {
-    setNewService(prev => ({
-      ...prev,
-      certifications: prev.certifications.filter((_, i) => i !== index)
-    }));
+    setNewService(prev => {
+      const updatedCerts = [...prev.certifications];
+      // Révoquer l'URL de prévisualisation avant de supprimer
+      if (updatedCerts[index].preview) {
+        URL.revokeObjectURL(updatedCerts[index].preview);
+      }
+      updatedCerts.splice(index, 1);
+      return { ...prev, certifications: updatedCerts };
+    });
   };
 
   const addService = async () => {
@@ -63,18 +89,18 @@ const LocalServiceModel = () => {
     const formData = new FormData();
     formData.append('nom', newService.nom);
     formData.append('categorie', newService.categorie);
-    formData.append('description', newService.description || '');
-
-    // Ajouter les photos
-    newService.photos.forEach((photo) => {
-      formData.append('photos', photo.file);
+    formData.append('description', newService.description);
+    
+    // Pour les photos
+    newService.photos.forEach((photo, index) => {
+      formData.append(`photos`, photo.file);
     });
-
-    // Ajouter les certifications
-    newService.certifications.forEach((cert) => {
-      formData.append('certifications', cert.file);
+    
+    // Pour les certifications
+    newService.certifications.forEach((cert, index) => {
+      formData.append(`certifications`, cert.file);
     });
-
+    
     try {
       setLoading(true);
       setError(null);
@@ -90,14 +116,18 @@ const LocalServiceModel = () => {
         }
       );
 
+      // Nettoyer les prévisualisations avant de réinitialiser
+      newService.photos.forEach(photo => {
+        if (photo.preview) URL.revokeObjectURL(photo.preview);
+      });
+      newService.certifications.forEach(cert => {
+        if (cert.preview) URL.revokeObjectURL(cert.preview);
+      });
+
       // Réinitialiser le formulaire
       setServices(prev => [...prev, response.data]);
       setNewService(INITIAL_SERVICE_STATE);
       setSuccess('Service ajouté avec succès !');
-
-      // Nettoyer les prévisualisations
-      newService.photos.forEach(photo => URL.revokeObjectURL(photo.preview));
-      newService.certifications.forEach(cert => URL.revokeObjectURL(cert.preview));
 
     } catch (err) {
       console.error('Erreur lors de l\'ajout du service:', err);

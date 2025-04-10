@@ -10,34 +10,7 @@ const ServicesDisplay = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-//   useEffect(() => {
-//     // Vérifier s'il y a un nouveau service depuis la navigation
-//     if (location.state?.newService) {
-//       setServices(prev => [...prev, location.state.newService]);
-//       setMessage(location.state?.message);
-      
-//       // Effacer l'état pour éviter les messages en double
-//       window.history.replaceState({}, document.title);
-//     }
-
-//     // Récupérer les services existants
-    
-//     const fetchServices = async () => {
-//       try {
-//         const response = await axios.get('https://essaietache21backend.onrender.com/api/services');
-//         setServices(response.data);
-//       } catch (error) {
-//         console.error('Erreur lors de la récupération des services:', error);
-//         setMessage('Impossible de charger les services');
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchServices();
-//   }, []);
-
-useEffect(() => {
+  useEffect(() => {
     const fetchServices = async () => {
       try {
         const response = await axios.get('https://essaietache21backend.onrender.com/api/services');
@@ -45,15 +18,34 @@ useEffect(() => {
         setServices(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des services:', error);
+        setMessage('Impossible de charger les services');
       } finally {
         setLoading(false);
       }
     };
-  
+
     fetchServices();
   }, []);
-  
+
+  const renderImage = (imageUrl) => {
+    if (!imageUrl) {
+      return 'https://via.placeholder.com/300x200?text=No+Image';
+    }
+
+    // Si l'URL est une URL Cloudinary, on la retourne directement
+    return imageUrl;
+  };
+
+  const handleImageError = (e) => {
+    console.error('Erreur de chargement d\'image:', e.target.src);
+    e.target.src = 'https://via.placeholder.com/300x200?text=Error+Loading+Image';
+  };
+
   const handleDeleteService = async (serviceId) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) {
+      return;
+    }
+
     try {
       await axios.delete(`https://essaietache21backend.onrender.com/api/services/${serviceId}`);
       setServices(prev => prev.filter(service => service._id !== serviceId));
@@ -88,7 +80,6 @@ useEffect(() => {
         </button>
       </div>
 
-      {/* Message de succès ou d'erreur */}
       {message && (
         <div className={`
           mb-6 p-4 rounded-lg text-center 
@@ -100,57 +91,43 @@ useEffect(() => {
         </div>
       )}
 
-      {/* Grille de services */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {services.map((service) => (
           <div 
             key={service._id} 
             className="bg-white shadow-lg rounded-xl overflow-hidden transform transition-all duration-300 hover:scale-105"
           >
-       {/* Image principale */}
-<div className="h-48 overflow-hidden">
-  {service.photos && service.photos.length > 0 ? (
-    <>
-      {/* Afficher l'URL pour vérification */}
-      <p className="text-xs text-gray-500">{service.photos[0]}</p>
-      <img 
-  src={
-    service.photos[0].startsWith('http') 
-      ? service.photos[0]  // Full URL
-      : `https://essaietache21backend.onrender.com${service.photos[0]}`  // Relative path
-  }
-  alt={service.nom} 
-  className="w-full h-full object-cover"
-  onError={(e) => {
-    console.error('Image load error', service.photos[0]);
-    e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
-  }}
-/>
-    </>
-  ) : (
-    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
-      Pas d'image
-    </div>
-  )}
-</div>
+            <div className="h-48 overflow-hidden">
+              {service.photos && service.photos.length > 0 ? (
+                <img 
+                  src={renderImage(service.photos[0])}
+                  alt={service.nom} 
+                  className="w-full h-full object-cover"
+                  onError={handleImageError}
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
+                  Pas d'image
+                </div>
+              )}
+            </div>
 
-            {/* Détails du service */}
             <div className="p-4">
               <h2 className="text-xl font-bold mb-2 text-gray-800">{service.nom}</h2>
               <p className="text-sm text-gray-600 mb-2">{service.categorie}</p>
               <p className="text-sm text-gray-500 line-clamp-3">{service.description}</p>
             </div>
 
-            {/* Actions */}
             <div className="flex justify-between p-4 border-t">
-            <button 
-  onClick={() => navigate(`/service/${service._id}`)}
-  className="text-blue-500 hover:text-blue-700 flex items-center"
->
-  <FaEye className="mr-2" /> Voir
-</button>
+              <button 
+                onClick={() => navigate(`/service/${service._id}`)}
+                className="text-blue-500 hover:text-blue-700 flex items-center"
+              >
+                <FaEye className="mr-2" /> Voir
+              </button>
 
               <button 
+                onClick={() => navigate(`/edit-service/${service._id}`)}
                 className="text-green-500 hover:text-green-700 flex items-center"
               >
                 <FaEdit className="mr-2" /> Éditer
@@ -167,7 +144,6 @@ useEffect(() => {
         ))}
       </div>
 
-      {/* Message si aucun service */}
       {services.length === 0 && (
         <div className="text-center text-gray-500 mt-8">
           Vous n'avez pas encore ajouté de services.
